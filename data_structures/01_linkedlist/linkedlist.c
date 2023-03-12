@@ -7,9 +7,12 @@ typedef struct node {
     struct node* next;
 } node_t;
 
+/*
+    Allocates memory and sets value, initially points next to NULL.
+*/
 node_t* create_node(int value)
 {
-    node_t *new_node = 0;
+    node_t *new_node = NULL;
 
     // NO ERROR CHECK
     new_node = (node_t*) malloc(sizeof(node_t));
@@ -17,10 +20,17 @@ node_t* create_node(int value)
     fprintf(stdout, "will create node with value %d\n", value);
 
     new_node->value = value;
+    new_node->next = NULL;
 
     return (new_node);
 }
 
+/*
+    Adds a node to the linked list.
+
+    If position is 0 node will be added as the first node, returning the new first node.
+    If position is -1 node will be added at the end of the linked list.
+*/
 node_t* add_node_to_list(int position, int value, node_t* list_entry)
 {
     node_t* current_node = list_entry;
@@ -30,6 +40,12 @@ node_t* add_node_to_list(int position, int value, node_t* list_entry)
     fprintf(stdout, "will add node with value %d at position %d\n", value, position);
     new_node = create_node(value);
 
+    // There is no node in the list yet.
+    if (list_entry == NULL) {
+        return (new_node);
+    }
+
+    // Create new entry node
     if (position == 0) {
         if (list_entry != NULL) {
             new_node->next = list_entry;
@@ -57,6 +73,11 @@ node_t* add_node_to_list(int position, int value, node_t* list_entry)
     return (NULL);
 }
 
+/*
+    Removes a node from the linked list.
+
+    If position is 0 the first node will be removed and the new first node will be returned.
+*/
 node_t* remove_node_from_list(int position, node_t* list_entry)
 {
     node_t* current_node = list_entry;
@@ -88,6 +109,9 @@ node_t* remove_node_from_list(int position, node_t* list_entry)
     return (NULL);
 }
 
+/*
+    Returns the number of elements from the linked list, first element will be 0.
+*/
 int list_length(node_t* list_entry)
 {
     node_t* current_node = list_entry;
@@ -97,9 +121,13 @@ int list_length(node_t* list_entry)
         current_node = current_node->next;
         i++;
     }
-    return (i);
+    return(i);
 }
 
+/*
+    Prints the address, the index and the value of every nodes and returns the
+    number of elements from the linked list, first element will be 0.
+*/
 int traverse_list(node_t* list_entry)
 {
     node_t* current_node = list_entry;
@@ -110,7 +138,7 @@ int traverse_list(node_t* list_entry)
         current_node = current_node->next;
         i++;
     }
-    return (0);
+    return(i);
 }
 
 int main()
@@ -120,7 +148,7 @@ int main()
 
     fprintf(stdout, "\nsize of list node: %d\n\n", sizeof(node_t));
 
-    new_node = add_node_to_list(0, 15, entry_node);
+    new_node = add_node_to_list(-1, 15, entry_node);
     if (new_node != NULL) {
         entry_node = new_node;
     }
@@ -168,5 +196,5 @@ int main()
 
     fprintf(stdout, "list length: %d\n", list_length(entry_node)+1);
 
-    return (0);
+    exit(0);
 }
