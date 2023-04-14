@@ -94,12 +94,8 @@ int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_dete
     }
     fprintf(stdout, "pos [pos:%d] already taken by [ks:%d]\n", i, ks);
 
-    int b = i - calculate_double_hash(k, m);
-    if (b < 0) {
-        b = calculate_hash(b, m);
-    }
-
     // check if alternate position is empty
+    int b = modulo_Euclidean((i - calculate_double_hash(k, m)), HASHMAP_SIZE);
     if (*(hashmap + b) == -1) {
         // alternate position is empty - insert k
         fprintf(stdout, "will store [k:%d] to [pos:%d]\n", k, b);
@@ -109,10 +105,7 @@ int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_dete
     fprintf(stdout, "alternate pos [pos:%d] already taken by [kx:%d]\n", b, *(hashmap + b));
 
     // alternate position is not empty - try to relocate ks
-    int bs = i - calculate_double_hash(ks, m);
-    if (bs < 0) {
-        bs = calculate_hash(bs, m);
-    }
+    int bs = modulo_Euclidean((i - calculate_double_hash(ks, m)), HASHMAP_SIZE);
     if (*(hashmap + bs) == -1) {
         // alternate position is empty - move ks
         fprintf(stdout, "will move [ks:%d] from [old:%d] to [pos:%d]\n", ks, i, bs);
