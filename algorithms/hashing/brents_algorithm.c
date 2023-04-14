@@ -11,6 +11,7 @@
 */
 
 #define HASHMAP_SIZE 100
+#define CYCLE_DETECT_INIT_VALUE -1
 
 /*
     Round float to integer with < 0.5 down and >= 0.5 up.
@@ -50,19 +51,6 @@ int calculate_double_hash(int k, int m)
     return (1 + modulo_Euclidean(k, m - 2));
 }
 
-/*
-    Generate a new hashmap index based on j using a quadaratic algorithm.
-    The result of the divison j/2 is rounded up on 0.5 before square happens.
-*/
-int quadratic_open_addressing(int j, int k, int modulo_value)
-{
-    // round 0.5 up ..
-    int x = FLOAT_TO_INT((float)j/(float)2);
-
-    // .. before square
-    return (int) pow(x, 2)*(int) pow(-1, j);
-}
-
 /* Search for a key k in the hashmap with a modulo of m.
    Return position of element in the hashmap or -1 if not found.
 */
@@ -78,7 +66,8 @@ int search_key(int* hashmap, int k, int m)
 
     // key not found - searching
     for (int j = 0; j < m - 1; j++) {
-        int s = quadratic_open_addressing(j, k, m);
+        // int s = quadratic_open_addressing(j, k, m);
+        int s = 0;
         int nhash_pos = calculate_hash(pos - s, m);
         // fprintf(stdout, "QOA FOR %d HP (%d - %d) mod 7 = %d\n", k, pos, s, nhash_pos);
 
@@ -91,17 +80,18 @@ int search_key(int* hashmap, int k, int m)
     return -1;
 }
 
-int brents_algorithm(int* hashmap, int i, int k, int m)
+int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_detection)
 {
     fprintf(stdout, "-- BA for [k:%d] with [i:%d]\n", k, i);
 
-    // end all
-    if (*(hashmap + i) == -3) {
-        return -1;
-    }
-
     // position is already taken - probe for alternate position
     int ks = hashmap[i];
+    if (cycle_detection == CYCLE_DETECT_INIT_VALUE) {
+        cycle_detection = i;
+    } else if (cycle_detection == i) {
+        fprintf(stdout, "cycle detected, erroring out\n");
+        return -1;
+    }
     fprintf(stdout, "pos [pos:%d] already taken by [ks:%d]\n", i, ks);
 
     int b = i - calculate_double_hash(k, m);
@@ -134,19 +124,20 @@ int brents_algorithm(int* hashmap, int i, int k, int m)
     }
     fprintf(stdout, "cannot move [ks:%d] to [pos:%d], already taken by [kx:%d]\n", ks, bs, *(hashmap + bs));
 
-    return brents_algorithm(hashmap, b, k, m);
+    return recursive_brents_algorithm(hashmap, b, k, m, cycle_detection);
 }
 
 int main()
 {
     int hashmap[HASHMAP_SIZE];
-    int basic_modulo_value = 7;
-    int hashvalues[] = {12, 53, 5, 15, 2, 19, 7};
+    int basic_modulo_value = 11;
+    int hashvalues[] = {12, 53, 5, 15, 2, 19, 88, 99, 77, 67, 3};
     int k = -1;
     int m = basic_modulo_value;
 
     // initialize the hashmap with -1 values
     memset(hashmap, -1, sizeof(hashmap));
+
     // set array stop
     hashmap[HASHMAP_SIZE - 1] = -3;
 
@@ -156,7 +147,7 @@ int main()
         // calculate first position
         int i = calculate_hash(k, m);
 
-        fprintf(stdout, "POSPOS: (%d) mod %d = %d\n", k, m, i);
+        fprintf(stdout, "----- POSPOS: (%d) mod %d = %d\n", k, m, i);
 
         // check if position is already taken in hashmap
         if (hashmap[i] == -1) {
@@ -168,11 +159,10 @@ int main()
         }
 
         // position is already taken - probe for alternate position
-        if (brents_algorithm(hashmap, i, k, m) < 0) {
+        if (recursive_brents_algorithm(hashmap, i, k, m, CYCLE_DETECT_INIT_VALUE) < 0) {
             fprintf(stdout, "cannot find empty position for [key:%d], exiting.\n", k);
             break;
         }
-        // hashmap[position] = k;
     }
 
     fprintf(stdout, "-----\n");
