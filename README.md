@@ -25,6 +25,15 @@ One of the fastest merging algorithm
 
 - 2-Way merge sort algorithm
 
+### Hashing
+
+Various ways to implement hashmap functionality.
+
+- Linear Open Addressing
+- Quadratic Open Addressing
+- Brent's Algorithm
+- Own implementation of recursive Brent's Algorithm
+
 ## Data Structures
 
 ### Linked List
