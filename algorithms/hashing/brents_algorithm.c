@@ -21,6 +21,10 @@
         hashtab[i].key := wert
         hashtab[i].zustand := belegt
 
+    but changed the following lines to be in accordance with lecture:
+        neufolgt := (i - h'(wert)) mod hashtablänge
+        altfolgt := (i - h'(hashtab[i].key)) mod hashtablänge
+
     Compile with:
         gcc -lm -ggdb -o brent brents_algorithm.c && ./brent
 */
@@ -127,8 +131,8 @@ int brents_algorithm(int* hashmap, int k, int m)
             return -1;
         }
 
-        int neufolgt = modulo_Euclidean((i + calculate_double_hash(k, m)), m);
-        int altfolgt = modulo_Euclidean((i + calculate_double_hash(*(hashmap + i), m)), m);
+        int neufolgt = modulo_Euclidean((i - calculate_double_hash(k, m)), m);
+        int altfolgt = modulo_Euclidean((i - calculate_double_hash(*(hashmap + i), m)), m);
 
         if (*(hashmap + neufolgt) == -1 || *(hashmap + altfolgt) != -1) {
             i = neufolgt;
@@ -146,7 +150,7 @@ int main()
 {
     int hashmap[HASHMAP_SIZE];
     int m = HASHMAP_SIZE;
-    int hashvalues[] = {12, 53, 5, 15, 2, 19, 88, 22};
+    int hashvalues[] = {12, 53, 5, 15, 2, 19};
     int k = -1;
 
     // initialize the hashmap with -1 values
