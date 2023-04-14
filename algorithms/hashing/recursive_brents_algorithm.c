@@ -58,27 +58,39 @@ int calculate_double_hash(int k, int m)
 */
 int search_key(int* hashmap, int k, int m)
 {
-    int pos = -1;
-    pos = calculate_hash(k, m);
+    fprintf(stdout, "searching for [k:%d] in hashmap\n", k);
 
-    // key found returning
+    int pos = -1;
+    int cycle_detection = CYCLE_DETECT_INIT_VALUE;
+
+    // look for key in first possible place
+    pos = calculate_hash(k, m);
     if (*(hashmap + pos) == k) {
+        // key found returning
         return pos;
     }
 
-    // key not found - searching
-    for (int j = 0; j < m - 1; j++) {
-        // int s = quadratic_open_addressing(j, k, m);
-        int s = 0;
-        int nhash_pos = calculate_hash(pos - s, m);
-        // fprintf(stdout, "QOA FOR %d HP (%d - %d) mod 7 = %d\n", k, pos, s, nhash_pos);
+    fprintf(stdout, "[k:%d] not found in first possible [pos:%d], continue search ..\n", k, pos);
 
-        if (*(hashmap + nhash_pos) == k) {
-            return nhash_pos;
+    while (1) {
+        if (cycle_detection == CYCLE_DETECT_INIT_VALUE) {
+            cycle_detection = pos;
+        } else if (cycle_detection == pos) {
+            fprintf(stdout, "cycle detected, erroring out\n");
+            return -1;
         }
+
+        int altpos = modulo_Euclidean((pos - calculate_double_hash(k, m)), m);
+        if (*(hashmap + altpos) == k) {
+            // key found returning
+            return altpos;
+        }
+        fprintf(stdout, "[k:%d] not found on [altpos:%d], continue search ..\n", k, altpos);
+
+        pos = altpos;
     }
 
-    // search without success
+    // search without success - never reached
     return -1;
 }
 
@@ -175,26 +187,25 @@ int main()
 
     fprintf(stdout, "-----\n");
 
-    // int spos = -1;
-    // int sval = -1;
+    int spos = -1;
+    int sval = -1;
 
-    // sval = 7;
-    // spos = search_key(hashmap, sval, m);
-    // fprintf(stdout, "searching for [k:%d] ..\n", sval);
-    // if (spos == -1) {
-    //     fprintf(stdout, "[k:%d] not found..\n", sval);
-    // } else {
-    //     fprintf(stdout, "[k:%d] found on [pos:%d]..\n", sval, spos);
-    // }
+    sval = 7;
+    spos = search_key(hashmap, sval, m);
+    if (spos == -1) {
+        fprintf(stdout, "[k:%d] not found..\n", sval);
+    } else {
+        fprintf(stdout, "[k:%d] found on [pos:%d]..\n", sval, spos);
+    }
 
-    // sval = 5;
-    // spos = search_key(hashmap, sval, m);
-    // fprintf(stdout, "searching for [k:%d] ..\n", sval);
-    // if (spos == -1) {
-    //     fprintf(stdout, "[k:%d] not found..\n", sval);
-    // } else {
-    //     fprintf(stdout, "[k:%d] found on [pos:%d]..\n", sval, spos);
-    // }
+    sval = 5;
+    fprintf(stdout, "searching for [k:%d] ..\n", sval);
+    spos = search_key(hashmap, sval, m);
+    if (spos == -1) {
+        fprintf(stdout, "[k:%d] not found..\n", sval);
+    } else {
+        fprintf(stdout, "[k:%d] found on [pos:%d]..\n", sval, spos);
+    }
 
     return 0;
 }
