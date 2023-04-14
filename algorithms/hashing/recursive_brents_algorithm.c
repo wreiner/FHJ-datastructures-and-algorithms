@@ -3,7 +3,7 @@
 #include <math.h>
 
 /*
-    Brents Algorithm
+    Brents Algorithm in recursive way
     Hashmap Implementation
 
     Compile with:
@@ -51,8 +51,10 @@ int calculate_double_hash(int k, int m)
     return (1 + modulo_Euclidean(k, m - 2));
 }
 
-/* Search for a key k in the hashmap with a modulo of m.
-   Return position of element in the hashmap or -1 if not found.
+/*
+    Search for a key k in the hashmap with a modulo of m.
+
+    Return position of element in the hashmap or -1 if not found.
 */
 int search_key(int* hashmap, int k, int m)
 {
@@ -80,6 +82,13 @@ int search_key(int* hashmap, int k, int m)
     return -1;
 }
 
+/*
+    Insert k into hashmap with a modulo of m following brents algorithm.
+    To detect cycles when no empty position can be found a cycle_detection value is needed.
+    It is set via #define CYCLE_DETECT_INIT_VALUE.
+
+    Will return the position of k in the hashmap, or -1 if no position is available for k.
+*/
 int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_detection)
 {
     fprintf(stdout, "-- BA for [k:%d] with [i:%d]\n", k, i);
