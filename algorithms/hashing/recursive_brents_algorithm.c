@@ -10,7 +10,7 @@
         gcc -lm -ggdb -o recbrent recursive_brents_algorithm.c && ./recbrent
 */
 
-#define HASHMAP_SIZE 100
+#define HASHMAP_SIZE 7
 #define CYCLE_DETECT_INIT_VALUE -1
 
 /*
@@ -93,18 +93,20 @@ int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_dete
 {
     fprintf(stdout, "-- BA for [k:%d] with [i:%d]\n", k, i);
 
-    // position is already taken - probe for alternate position
-    int ks = hashmap[i];
+    // cycle detection
     if (cycle_detection == CYCLE_DETECT_INIT_VALUE) {
         cycle_detection = i;
     } else if (cycle_detection == i) {
         fprintf(stdout, "cycle detected, erroring out\n");
         return -1;
     }
+
+    // position is already taken - probe for alternate position
+    int ks = hashmap[i];
     fprintf(stdout, "pos [pos:%d] already taken by [ks:%d]\n", i, ks);
 
     // check if alternate position is empty
-    int b = modulo_Euclidean((i - calculate_double_hash(k, m)), HASHMAP_SIZE);
+    int b = modulo_Euclidean((i - calculate_double_hash(k, m)), m);
     if (*(hashmap + b) == -1) {
         // alternate position is empty - insert k
         fprintf(stdout, "will store [k:%d] to [pos:%d]\n", k, b);
@@ -114,7 +116,7 @@ int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_dete
     fprintf(stdout, "alternate pos [pos:%d] already taken by [kx:%d]\n", b, *(hashmap + b));
 
     // alternate position is not empty - try to relocate ks
-    int bs = modulo_Euclidean((i - calculate_double_hash(ks, m)), HASHMAP_SIZE);
+    int bs = modulo_Euclidean((i - calculate_double_hash(ks, m)), m);
     if (*(hashmap + bs) == -1) {
         // alternate position is empty - move ks
         fprintf(stdout, "will move [ks:%d] from [old:%d] to [pos:%d]\n", ks, i, bs);
@@ -132,16 +134,12 @@ int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_dete
 int main()
 {
     int hashmap[HASHMAP_SIZE];
-    int basic_modulo_value = 7;
-    int hashvalues[] = {12, 53, 5, 15, 2, 19, 88, 99, 77, 67, 3};
+    int m = HASHMAP_SIZE;
+    int hashvalues[] = {12, 53, 5, 15, 2, 19};
     int k = -1;
-    int m = basic_modulo_value;
 
     // initialize the hashmap with -1 values
     memset(hashmap, -1, sizeof(hashmap));
-
-    // set array stop
-    hashmap[HASHMAP_SIZE - 1] = -3;
 
     for (int p = 0; p < sizeof(hashvalues)/sizeof(p); p++) {
         int k = hashvalues[p];
@@ -162,14 +160,14 @@ int main()
 
         // position is already taken - probe for alternate position
         if (recursive_brents_algorithm(hashmap, i, k, m, CYCLE_DETECT_INIT_VALUE) < 0) {
-            fprintf(stdout, "cannot find empty position for [key:%d], exiting.\n", k);
+            fprintf(stdout, "ERROR: cannot find empty position for [key:%d], exiting.\n", k);
             break;
         }
     }
 
     fprintf(stdout, "-----\n");
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < HASHMAP_SIZE; i++) {
         if (hashmap[i] != -1) {
             fprintf(stdout, "[%d] = %d\n", i, hashmap[i]);
         }
