@@ -80,57 +80,44 @@ int search_key(int* hashmap, int k, int m)
     return -1;
 }
 
-int recursive_brents_algorithm(int* hashmap, int i, int k, int m, int cycle_detection)
+// https://de.wikipedia.org/wiki/Brent-Hashing
+//  funktion INSERT-BRENT-HASHING(hashtab,wert)
+//  i := h(wert)
+//  while hashtab[i].zustand = belegt
+//  do
+//    neufolgt := (i + h'(wert)) mod hashtablänge
+//    altfolgt := (i + h'(hashtab[i].key)) mod hashtablänge
+//    if hashtab[neufolgt].zustand = frei oder hashtab[altfolgt].zustand = belegt
+//    then i := neufolgt
+//    else hashtab[altfolgt].key := hashtab[i].key
+//         hashtab[altfolgt].zustand := belegt
+//         hashtab[i].zustand := entfernt
+//  hashtab[i].key := wert
+//  hashtab[i].zustand := belegt
+int brents_algorithm(int* hashmap, int k, int m)
 {
-    fprintf(stdout, "-- BA for [k:%d] with [i:%d]\n", k, i);
+    int i = calculate_hash(k, m);
 
-    // position is already taken - probe for alternate position
-    int ks = hashmap[i];
-    if (cycle_detection == CYCLE_DETECT_INIT_VALUE) {
-        cycle_detection = i;
-    } else if (cycle_detection == i) {
-        fprintf(stdout, "cycle detected, erroring out\n");
-        return -1;
-    }
-    fprintf(stdout, "pos [pos:%d] already taken by [ks:%d]\n", i, ks);
+    while (*(hashmap + i) != -1) {
+        int neufolgt = modulo_Euclidean((i + calculate_double_hash(k, m)), HASHMAP_SIZE);
+        int altfolgt = modulo_Euclidean((i + calculate_double_hash(*(hashmap + i), m)), HASHMAP_SIZE);
 
-    int b = i - calculate_double_hash(k, m);
-    if (b < 0) {
-        b = calculate_hash(b, m);
+        if (*(hashmap + neufolgt) == -1 || *(hashmap + altfolgt) != -1) {
+            i = neufolgt;
+        } else {
+            *(hashmap + altfolgt) = *(hashmap + i);
+            *(hashmap + i) = -1;
+        }
     }
 
-    // check if alternate position is empty
-    if (*(hashmap + b) == -1) {
-        // alternate position is empty - insert k
-        fprintf(stdout, "will store [k:%d] to [pos:%d]\n", k, b);
-        *(hashmap + b) = k;
-        return b;
-    }
-    fprintf(stdout, "alternate pos [pos:%d] already taken by [kx:%d]\n", b, *(hashmap + b));
-
-    // alternate position is not empty - try to relocate ks
-    int bs = i - calculate_double_hash(ks, m);
-    if (bs < 0) {
-        bs = calculate_hash(bs, m);
-    }
-    if (*(hashmap + bs) == -1) {
-        // alternate position is empty - move ks
-        fprintf(stdout, "will move [ks:%d] from [old:%d] to [pos:%d]\n", ks, i, bs);
-        *(hashmap + bs) = ks;
-        // now original position is free - insert k
-        fprintf(stdout, "will now store [k:%d] to [pos:%d]\n", k, i);
-        *(hashmap + i) = k;
-        return i;
-    }
-    fprintf(stdout, "cannot move [ks:%d] to [pos:%d], already taken by [kx:%d]\n", ks, bs, *(hashmap + bs));
-
-    return recursive_brents_algorithm(hashmap, b, k, m, cycle_detection);
+    *(hashmap + i) = k;
+    return i;
 }
 
 int main()
 {
     int hashmap[HASHMAP_SIZE];
-    int basic_modulo_value = 11;
+    int basic_modulo_value = 7;
     int hashvalues[] = {12, 53, 5, 15, 2, 19, 88, 99, 77, 67, 3};
     int k = -1;
     int m = basic_modulo_value;
@@ -159,7 +146,7 @@ int main()
         }
 
         // position is already taken - probe for alternate position
-        if (recursive_brents_algorithm(hashmap, i, k, m, CYCLE_DETECT_INIT_VALUE) < 0) {
+        if (brents_algorithm(hashmap, k, m) < 0) {
             fprintf(stdout, "cannot find empty position for [key:%d], exiting.\n", k);
             break;
         }
