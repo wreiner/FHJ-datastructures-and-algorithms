@@ -9,9 +9,6 @@
         gcc -lm -ggdb -o inssort insertionsort.c && ./inssort
 */
 
-/*
-*/
-
 int main()
 {
     int unsorted[] = {15, 2, 43, 17, 4, 8, 47};

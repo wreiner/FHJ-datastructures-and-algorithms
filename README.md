@@ -5,6 +5,11 @@ in the Data Structures and Algorithms lecture at FHJ.
 
 ## Algorithms
 
+- Factorial
+  - iterate
+  - recursive
+- Sum odd numbers
+
 ### Max subarray sum
 
 Find the subarray with the biggest sum in an array.
@@ -19,11 +24,15 @@ Check if opening and closing braces match.
 
 - using self implemented stack data structure
 
-### Merge sort
+### Sorting
 
-One of the fastest merging algorithm
-
-- 2-Way merge sort algorithm
+- Selection sort
+- Insertion sort
+- Bubble sort
+- Quick sort
+  - in-situ
+- Merge sort
+    - 2-Way merge sort algorithm
 
 ### Hashing
 

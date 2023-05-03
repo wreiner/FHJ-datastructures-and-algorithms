@@ -9,9 +9,6 @@
         gcc -lm -ggdb -o bubblesort bubblesort.c && ./bubblesort
 */
 
-/*
-*/
-
 int main()
 {
     int unsorted[] = {15, 2, 43, 17, 4, 8, 47};
